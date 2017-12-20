@@ -14,7 +14,7 @@ const files = new Files()
 
 async function createTables () {
   users.create()
-  users.addUser('timukhin@ukr.net', 'secret')
+  users.addUser('example@gmail.com', 'secret')
   files.create()
   users.database.end()
   files.database.end()
