@@ -34,6 +34,7 @@ const server = http.createServer((req, res) => {
     logger.error(`${err}`)
   })
   if (req.method === 'OPTIONS') {
+    res.writeHead(200, headers)
     res.end()
   } else if (req.url === '/api/login') {
     const users = new Users()
