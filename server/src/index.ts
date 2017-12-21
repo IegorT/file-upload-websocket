@@ -17,6 +17,14 @@ const logger = new Logger(module.filename).logger
 
 // Server config
 const server = http.createServer((req, res) => {
+  const headers: {} = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Credentials': false,
+    'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Headers': 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept',
+    'Content-Type': 'application/json'
+  }
   req.on('error', (err) => {
     logger.error(`${err}`)
     res.statusCode = 400
@@ -25,7 +33,9 @@ const server = http.createServer((req, res) => {
   res.on('error', (err) => {
     logger.error(`${err}`)
   })
-  if (req.url === '/api/login') {
+  if (req.method === 'OPTIONS') {
+    res.end()
+  } else if (req.url === '/api/login') {
     const users = new Users()
     let body:string = ''
     req.on('data', (chunk:string) => { body += chunk })
@@ -33,20 +43,20 @@ const server = http.createServer((req, res) => {
       let recive = JSON.parse(body)
       users.checkUser(recive).then(data => {
         if (data.auth) {
-          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.writeHead(200, headers)
           let token = jwt.sign({ user_id: data.user_id}, salt, { expiresIn : '1 days' })
           res.end(JSON.stringify({'token': token}))
           logger.info(`To ${req.connection.remoteAddress} send token`)
           users.database.end()
         } else {
-          res.writeHead(403, {'Content-Type': 'application/json'})
+          res.writeHead(403, headers)
           res.end(JSON.stringify({'error': 'wrong email or password'}))
           logger.warn(`From ${req.connection.remoteAddress} wrong email or password`)
         }
       })
     })
    } else {
-    res.writeHead(404, { 'Content-Type': 'application/json' })
+    res.writeHead(404, headers)
     res.end(JSON.stringify('Bad request'))
     logger.warn(`From ${req.connection.remoteAddress} try access to ${req.url} - disconnected`)
   }
