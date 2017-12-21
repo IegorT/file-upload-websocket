@@ -48,12 +48,12 @@ const server = http.createServer((req, res) => {
           let token = jwt.sign({ user_id: data.user_id}, salt, { expiresIn : '1 days' })
           res.end(JSON.stringify({'token': token}))
           logger.info(`To ${req.connection.remoteAddress} send token`)
-          users.database.end()
         } else {
           res.writeHead(403, headers)
           res.end(JSON.stringify({'error': 'wrong email or password'}))
           logger.warn(`From ${req.connection.remoteAddress} wrong email or password`)
         }
+        users.database.end()
       })
     })
    } else {
